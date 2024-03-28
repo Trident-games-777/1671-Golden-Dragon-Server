@@ -72,6 +72,21 @@ class Game {
         }
     }
 
+    fun setCredentials(player: Char, name: String, resource: Int) {
+        println("Player = $player, name = $name, resource = $resource")
+        state.update {
+            if (player == 'X') {
+                it.copy(
+                    playerXName = name, playerXResource = resource
+                )
+            } else {
+                it.copy(
+                    playerOName = name, playerOResource = resource
+                )
+            }
+        }
+    }
+
     private fun getWinningPlayer(): Char? {
         val field = state.value.field
         return if (field[0][0] != null && field[0][0] == field[0][1] && field[0][1] == field[0][2]) {

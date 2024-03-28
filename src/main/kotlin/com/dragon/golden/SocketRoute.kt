@@ -1,5 +1,6 @@
 package com.dragon.golden
 
+import com.dragon.golden.models.Credentials
 import com.dragon.golden.models.Game
 import com.dragon.golden.models.MakeTurn
 import io.ktor.server.routing.*
@@ -20,8 +21,22 @@ fun Route.socket(game: Game) {
             try {
                 incoming.consumeEach { frame ->
                     if (frame is Frame.Text) {
-                        val action = extractAction(frame.readText())
-                        game.finishTurn(player, action.x, action.y)
+                        val text = frame.readText()
+                        val type = text.substringBefore("#")
+                        val body = text.substringAfter("#")
+                        when (type) {
+                            "make_turn" -> {
+                                val turn: MakeTurn = Json.decodeFromString(body)
+                                game.finishTurn(player, turn.x, turn.y)
+                            }
+
+                            "credentials" -> {
+                                val credentials: Credentials = Json.decodeFromString(body)
+                                game.setCredentials(player, credentials.name, credentials.resource)
+                            }
+                        }
+//                        val action = extractAction(frame.readText())
+//                        game.finishTurn(player, action.x, action.y)
                     }
                 }
             } catch (e: Exception) {

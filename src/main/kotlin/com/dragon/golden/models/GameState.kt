@@ -8,7 +8,11 @@ data class GameState(
     val field: Array<Array<Char?>> = emptyField(),
     val winningPlayer: Char? = null,
     val isBoardFull: Boolean = false,
-    val connectedPlayers: List<Char> = emptyList()
+    val connectedPlayers: List<Char> = emptyList(),
+    val playerXResource: Int = 0,
+    val playerOResource: Int = 0,
+    val playerXName: String = "Player 1",
+    val playerOName: String = "Player 2"
 ) {
     companion object {
         fun emptyField(): Array<Array<Char?>> {
@@ -18,7 +22,7 @@ data class GameState(
         }
     }
 
-     override fun equals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
