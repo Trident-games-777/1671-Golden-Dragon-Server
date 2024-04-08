@@ -21,34 +21,41 @@ class Game {
     }
 
     fun connectPlayer(session: WebSocketSession): Char? {
-        val isPlayerX = state.value.connectedPlayers.any { it == 'X' }
-        val player = if (isPlayerX) 'O' else 'X'
+        val isPlayerXAlreadyExists = state.value.connectedPlayers.any { it == 'X' }
+        val connectedPlayerChar = if (isPlayerXAlreadyExists) 'O' else 'X'
 
         state.update {
-            if (state.value.connectedPlayers.contains(player)) {
+            if (state.value.connectedPlayers.contains(connectedPlayerChar)) {
                 return null
             }
-            if (!playerSockets.containsKey(player)) {
-                playerSockets[player] = session
+            if (!playerSockets.containsKey(connectedPlayerChar)) {
+                playerSockets[connectedPlayerChar] = session
             }
             it.copy(
-                connectedPlayers = it.connectedPlayers + player
+                connectedPlayers = it.connectedPlayers + connectedPlayerChar
             )
         }
-        return player
+        return connectedPlayerChar
     }
 
     fun disconnectPlayer(player: Char) {
         playerSockets.remove(player)
         state.update {
             it.copy(
-                connectedPlayers = it.connectedPlayers - player
+                connectedPlayers = it.connectedPlayers - player,
+                field = if (it.connectedPlayers.size == 1) GameState.emptyField() else it.field,
+                playerXName = if (player == 'X') "Player 1" else it.playerXName,
+                playerXResource = if (player == 'X') 0 else it.playerXResource,
+                playerOName = if (player == 'O') "Player 2" else it.playerOName,
+                playerOResource = if (player == 'O') 0 else it.playerOResource,
             )
         }
     }
 
     suspend fun broadcast(state: GameState) {
+        println("-----------    in broadcast method    -----------")
         playerSockets.values.forEach { socket ->
+            println("-----------    socket = $socket, send = $state    -----------")
             socket.send(Json.encodeToString(state))
         }
     }

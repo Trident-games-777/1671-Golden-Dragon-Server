@@ -12,47 +12,38 @@ import kotlinx.serialization.json.Json
 fun Route.socket(game: Game) {
     route("/play") {
         webSocket {
-            val player = game.connectPlayer(this)
-            if (player == null) {
+            val playerChar = game.connectPlayer(this)
+            if (playerChar == null) {
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Room is full"))
                 return@webSocket
             }
 
             try {
                 incoming.consumeEach { frame ->
+                    println("--------------    FRAME    --------------")
                     if (frame is Frame.Text) {
                         val text = frame.readText()
+                        println("--------------    Text = $text    --------------")
                         val type = text.substringBefore("#")
                         val body = text.substringAfter("#")
                         when (type) {
                             "make_turn" -> {
                                 val turn: MakeTurn = Json.decodeFromString(body)
-                                game.finishTurn(player, turn.x, turn.y)
+                                game.finishTurn(playerChar, turn.x, turn.y)
                             }
 
                             "credentials" -> {
                                 val credentials: Credentials = Json.decodeFromString(body)
-                                game.setCredentials(player, credentials.name, credentials.resource)
+                                game.setCredentials(playerChar, credentials.name, credentials.resource)
                             }
                         }
-//                        val action = extractAction(frame.readText())
-//                        game.finishTurn(player, action.x, action.y)
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                game.disconnectPlayer(player)
+                game.disconnectPlayer(playerChar)
             }
         }
     }
-}
-
-private fun extractAction(message: String): MakeTurn {
-    // make_turn#{...}
-    val type = message.substringBefore("#")
-    val body = message.substringAfter("#")
-    return if (type == "make_turn") {
-        Json.decodeFromString(body)
-    } else MakeTurn(-1, -1)
 }

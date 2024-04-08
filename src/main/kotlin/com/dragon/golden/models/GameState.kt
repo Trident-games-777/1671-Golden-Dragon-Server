@@ -33,6 +33,10 @@ data class GameState(
         if (winningPlayer != other.winningPlayer) return false
         if (isBoardFull != other.isBoardFull) return false
         if (connectedPlayers != other.connectedPlayers) return false
+        if (playerXName != other.playerXName) return false
+        if (playerOName != other.playerOName) return false
+        if (playerXResource != other.playerXResource) return false
+        if (playerOResource != other.playerOResource) return false
 
         return true
     }
